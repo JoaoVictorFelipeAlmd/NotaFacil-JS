@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NotaFácil JS - Gerador de Recibos e Orçamentos para Autônomos</title>
+
+  <meta name="description"
+    content="Gere recibos e orçamentos profissionais em PDF instantaneamente. Ferramenta gratuita para autônomos, MEIs e prestadores de serviços locais.">
+  <meta name="keywords"
+    content="recibo, orçamento, pdf, autônomo, mei, prestador de serviço, gerador de recibo, javascript">
+  <meta name="author" content="NotaFácil JS">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+
+<body>
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-icon">
+          <i data-lucide="receipt"></i>
+        </div>
+        <div class="brand-info">
+          <h1>NotaFácil <span>JS</span></h1>
+          <p>Recibos & Orçamentos para Autônomos</p>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <button type="button" id="btnLoadSample" class="btn btn-secondary"
+          title="Carregar exemplo profissional pronto para testar">
+          <i data-lucide="sparkles"></i>
+          <span class="btn-text">Carregar Exemplo</span>
+        </button>
+
+        <button type="button" id="btnReset" class="btn btn-ghost"
+          title="Limpar dados do cliente e iniciar novo documento">
+          <i data-lucide="plus-circle"></i>
+          <span class="btn-text">Novo Documento</span>
+        </button>
+
+        <button type="button" id="btnWhatsApp" class="btn btn-whatsapp" title="Enviar resumo via WhatsApp">
+          <i data-lucide="message-circle"></i>
+          <span class="btn-text">WhatsApp</span>
+        </button>
+
+        <button type="button" id="btnPrint" class="btn btn-secondary" title="Imprimir diretamente">
+          <i data-lucide="printer"></i>
+          <span class="btn-text">Imprimir</span>
+        </button>
+
+        <button type="button" id="btnDownloadPDF" class="btn btn-primary" title="Gerar e Baixar PDF">
+          <i data-lucide="download"></i>
+          <span>Baixar PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-tabs-bar">
+    <button type="button" id="tabEditor" class="tab-btn active">
+      <i data-lucide="edit-3"></i>
+      <span>Formulário</span>
+    </button>
+    <button type="button" id="tabPreview" class="tab-btn">
+      <i data-lucide="eye"></i>
+      <span>Ver Documento</span>
+    </button>
+  </div>
+
+  <main class="app-main">
+    <section class="editor-pane" id="editorPane">
+      <form id="document-form" onsubmit="return false;">
+        <div class="form-card">
+          <div class="card-header">
+            <i data-lucide="file-text" class="card-icon"></i>
+            <h2>1. Tipo de Documento</h2>
+          </div>
+          <div class="card-body">
+            <div class="type-selector">
+              <label class="type-option">
+                <input type="radio" name="docType" value="orcamento" checked>
+                <div class="type-card">
+                  <i data-lucide="calculator"></i>
+                  <div>
+                    <strong>Orçamento</strong>
+                    <small>Proposta com validade e serviços</small>
+                  </div>
+                </div>
+              </label>
+
+              <label class="type-option">
+                <input type="radio" name="docType" value="recibo">
+                <div class="type-card">
+                  <i data-lucide="check-check"></i>
+                  <div>
+                    <strong>Recibo de Pagamento</strong>
+                    <small>Comprovante com quitação</small>
+                  </div>
+                </div>
+              </label>
+            </div>
+
+            <div class="form-grid-3 mt-3">
+              <div class="form-group">
+                <label for="docNumber">Nº do Documento</label>
+                <input type="text" id="docNumber" class="form-control" placeholder="2026-0001">
+              </div>
+              <div class="form-group">
+                <label for="docDate">Data de Emissão</label>
+                <input type="date" id="docDate" class="form-control">
+              </div>
+              <div class="form-group" id="dueDateGroup">
+                <label for="docDueDate">Válido Até</label>
+                <input type="date" id="docDueDate" class="form-control">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="card-header">
+            <div class="header-with-badge">
+              <i data-lucide="user-check" class="card-icon"></i>
+              <h2>2. Seus Dados (Prestador de Serviço)</h2>
+              <span class="save-badge" title="Estes dados ficam salvos no seu navegador para as próximas notas">
+                <i data-lucide="shield-check"></i> Salvo automaticamente
+              </span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="providerName">Seu Nome / Razão Social *</label>
+                <input type="text" id="providerName" class="form-control" placeholder="Ex: João da Silva Instalações">
+              </div>
+              <div class="form-group">
+                <label for="providerDoc">CPF ou CNPJ</label>
+                <input type="text" id="providerDoc" class="form-control"
+                  placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
+              </div>
+            </div>
+
+            <div class="form-grid-3 mt-2">
+              <div class="form-group">
+                <label for="providerPhone">WhatsApp / Telefone</label>
+                <input type="tel" id="providerPhone" class="form-control" placeholder="(00) 00000-0000" maxlength="15">
+              </div>
+              <div class="form-group">
+                <label for="providerEmail">E-mail</label>
+                <input type="email" id="providerEmail" class="form-control" placeholder="seuemail@exemplo.com">
+              </div>
+              <div class="form-group">
+                <label for="providerCityState">Cidade / UF</label>
+                <input type="text" id="providerCityState" class="form-control" placeholder="São Paulo - SP">
+              </div>
+            </div>
+            <div class="form-grid-2 mt-2">
+              <div class="form-group">
+                <label for="providerPixKey">Chave Pix para Pagamento</label>
+                <div class="input-with-select">
+                  <select id="providerPixType" class="form-select-sm">
+                    <option value="Chave Pix">Chave Pix</option>
+                    <option value="CPF">CPF</option>
+                    <option value="CNPJ">CNPJ</option>
+                    <option value="E-mail">E-mail</option>
+                    <option value="Celular">Celular</option>
+                    <option value="Aleatória">Aleatória</option>
+                  </select>
+                  <input type="text" id="providerPixKey" class="form-control" placeholder="Digite sua chave Pix">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label for="providerLogo">Logo da Empresa / Foto (Opcional)</label>
+                <div class="file-upload-wrapper">
+                  <input type="file" id="providerLogo" accept="image/png, image/jpeg, image/webp" class="file-input">
+                  <button type="button" id="btnRemoveLogo" class="btn btn-sm btn-ghost text-danger"
+                    style="display: none;">
+                    <i data-lucide="trash"></i> Remover
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="card-header">
+            <i data-lucide="users" class="card-icon"></i>
+            <h2>3. Dados do Cliente</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-grid-2">
+              <div class="form-group">
+                <label for="clientName">Nome do Cliente *</label>
+                <input type="text" id="clientName" class="form-control" placeholder="Ex: Mariana Duarte Souza">
+              </div>
+              <div class="form-group">
+                <label for="clientDoc">CPF ou CNPJ do Cliente</label>
+                <input type="text" id="clientDoc" class="form-control"
+                  placeholder="000.000.000-00 ou 00.000.000/0000-00" maxlength="18">
+              </div>
+            </div>
+
+            <div class="form-grid-2 mt-2">
+              <div class="form-group">
+                <label for="clientPhone">Telefone / WhatsApp do Cliente</label>
+                <input type="tel" id="clientPhone" class="form-control" placeholder="(00) 00000-0000" maxlength="15">
+              </div>
+              <div class="form-group">
+                <label for="clientAddress">Endereço / Local da Obra</label>
+                <input type="text" id="clientAddress" class="form-control" placeholder="Rua, Número, Bairro - Cidade">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-card">
+          <div class="card-header space-between">
+            <div class="header-title">
+              <i data-lucide="layers" class="card-icon"></i>
+              <h2>4. Itens & Serviços</h2>
+            </div>
+            <button type="button" id="btnAddItem" class="btn btn-sm btn-primary">
+              <i data-lucide="plus"></i>
+              <span>Adicionar Linha</span>
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="items-table-header">
+              <div class="col-desc">Descrição do Item / Serviço</div>
+              <div class="col-qty">Qtd.</div>
+              <div class="col-price">Valor Unit. (R$)</div>
+              <div class="col-subtotal">Subtotal</div>
+              <div class="col-action"></div>
+            </div>
+
+            <div id="itemsContainer" class="items-container">
+            </div>
+
+            <div class="form-grid-2 mt-4 items-footer-controls">
+              <div class="form-group">
+                <label for="discountInput">Desconto (R$)</label>
+                <input type="number" min="0" step="0.01" id="discountInput" class="form-control" placeholder="0,00">
+              </div>
+
+              <div class="form-group">
+                <label for="paymentMethod">Forma de Pagamento</label>
+                <select id="paymentMethod" class="form-control">
+                  <option value="pix">Pix</option>
+                  <option value="dinheiro">Dinheiro</option>
+                  <option value="cartao_credito">Cartão de Crédito</option>
+                  <option value="cartao_debito">Cartão de Débito</option>
+                  <option value="transferencia">Transferência Bancária</option>
+                  <option value="boleto">Boleto Bancário</option>
+                  <option value="a_combinar">A Combinar</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-card">
+          <div class="card-header">
+            <i data-lucide="message-square" class="card-icon"></i>
+            <h2>5. Observações & Termos de Garantia</h2>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <textarea id="notesInput" rows="3" class="form-control"
+                placeholder="Ex: Garantia de 90 dias sobre a mão de obra. Materiais inclusos. Proposta válida por 15 dias."></textarea>
+            </div>
+          </div>
+        </div>
+
+      </form>
+    </section>
+    <section class="preview-pane" id="previewPane">
+      <div class="preview-toolbar">
+        <div class="preview-toolbar-left">
+          <i data-lucide="file-check-2"></i>
+          <span>Pré-visualização em Tempo Real (A4)</span>
+        </div>
+        <div class="preview-toolbar-right">
+          <span class="preview-status-pill">
+            <span class="status-dot"></span> Sincronizado
+          </span>
+        </div>
+      </div>
+      <div class="paper-wrapper">
+        <div id="printable-document" class="a4-document">
+          <div class="doc-header">
+            <div class="doc-brand">
+              <img id="preview-provider-logo" class="doc-logo" alt="Logo" style="display: none;">
+              <div class="doc-provider-details">
+                <h3 id="preview-provider-name" class="doc-provider-title">Nome do Prestador / Empresa</h3>
+                <p id="preview-provider-doc" class="doc-text-muted"></p>
+                <p id="preview-provider-phone" class="doc-text-muted"></p>
+                <p id="preview-provider-email" class="doc-text-muted"></p>
+                <p id="preview-provider-city" class="doc-text-muted"></p>
+              </div>
+            </div>
+
+            <div class="doc-meta-card">
+              <div id="preview-doc-badge" class="doc-badge orcamento">ORÇAMENTO</div>
+              <div class="doc-meta-number">
+                Nº <span id="preview-doc-number">2026-0001</span>
+              </div>
+              <div class="doc-meta-row">
+                <span>Data:</span>
+                <strong id="preview-doc-date">14/10/2026</strong>
+              </div>
+              <div class="doc-meta-row" id="preview-due-date-container">
+                <span>Válido até:</span>
+                <strong id="preview-doc-due-date">29/10/2026</strong>
+              </div>
+            </div>
+          </div>
+          <div class="doc-divider"></div>
+          <div id="preview-receipt-declaration" style="display: none;"></div>
+          <div class="doc-section doc-client-section">
+            <h4 class="doc-section-title">DADOS DO CLIENTE</h4>
+            <div class="doc-client-grid">
+              <div>
+                <span class="meta-label">Cliente:</span>
+                <strong id="preview-client-name" class="meta-value">Nome do Cliente</strong>
+              </div>
+              <div>
+                <span class="meta-label">CPF / CNPJ:</span>
+                <span id="preview-client-doc" class="meta-value">-</span>
+              </div>
+              <div>
+                <span class="meta-label">Contato:</span>
+                <span id="preview-client-phone" class="meta-value">-</span>
+              </div>
+              <div>
+                <span class="meta-label">Endereço:</span>
+                <span id="preview-client-address" class="meta-value">-</span>
+              </div>
+            </div>
+          </div>
+          <div class="doc-section">
+            <h4 class="doc-section-title">DISCRIMINAÇÃO DOS SERVIÇOS E PRODUTOS</h4>
+            <table class="doc-table">
+              <thead>
+                <tr>
+                  <th style="width: 6%;">#</th>
+                  <th style="width: 54%;">Descrição</th>
+                  <th style="width: 10%; text-align: center;">Qtd</th>
+                  <th style="width: 15%; text-align: right;">Unitário</th>
+                  <th style="width: 15%; text-align: right;">Total</th>
+                </tr>
+              </thead>
+              <tbody id="preview-items-body">
+              </tbody>
+            </table>
+          </div>
+          <div class="doc-financial-row">
+            <div class="doc-financial-left">
+              <div class="payment-info-box">
+                <div class="payment-info-title">
+                  <i data-lucide="credit-card"></i> Forma de Pagamento
+                </div>
+                <div id="preview-payment-method" class="payment-info-method">Pix</div>
+
+                <div id="preview-pix-container" class="pix-key-display" style="display: none;">
+                  <span class="pix-tag">PAGAR VIA PIX:</span>
+                  <strong id="preview-pix-key"></strong>
+                </div>
+              </div>
+              <div id="preview-notes-container" class="doc-notes-box">
+                <div class="notes-title">Observações e Termos:</div>
+                <p id="preview-notes-text"></p>
+              </div>
+            </div>
+            <div class="doc-financial-right">
+              <table class="doc-totals-table">
+                <tr>
+                  <td>Subtotal:</td>
+                  <td id="preview-subtotal" class="text-right">R$ 0,00</td>
+                </tr>
+                <tr id="preview-discount-row" style="display: none;">
+                  <td>Desconto:</td>
+                  <td id="preview-discount" class="text-right text-discount">- R$ 0,00</td>
+                </tr>
+                <tr class="total-highlight-row">
+                  <td>TOTAL:</td>
+                  <td id="preview-total" class="text-right total-value">R$ 0,00</td>
+                </tr>
+              </table>
+              <div class="doc-extenso-box">
+                <span>Valor por extenso:</span>
+                <p id="preview-total-extenso">zero real</p>
+              </div>
+            </div>
+          </div>
+          <div class="doc-signature-section">
+            <p id="preview-signature-date-city" class="signature-date">São Paulo - SP, 14/10/2026</p>
+            <div class="signature-line-wrapper">
+              <div class="signature-line"></div>
+              <strong id="preview-signature-name" class="signature-name">Assinatura do Responsável</strong>
+              <span id="preview-signature-doc" class="signature-doc"></span>
+            </div>
+          </div>
+          <div class="doc-footer-legal">
+            Documento emitido eletronicamente via <strong>NotaFácil</strong> • Simples, Rápido e Profissional
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+  <div id="toast-container" class="toast-container"></div>
+  <script src="js/utils.js"></script>
+  <script src="js/pdf.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
