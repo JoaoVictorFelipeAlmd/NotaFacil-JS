@@ -11,19 +11,6 @@
 
 ---
 
-## 💡 Por que este projeto se destaca?
-
-Muitos projetos de portfólio limitam-se a clones de redes sociais ou listas de tarefas (To-Do Lists). O **NotaFácil JS** foi desenvolvido para:
-1. **Resolver uma dor real:** Milhões de microempreendedores e autônomos no Brasil não possuem CNPJ ou sistemas pagos de faturamento e acabam enviando orçamentos desformatados pelo WhatsApp ou assinando blocos de papel.
-2. **Proporcionar usabilidade real:**
-   - Funciona tanto em computadores quanto em smartphones (com abas de alternância de tela).
-   - Salva os dados do prestador no `localStorage` para não ser necessário redigitar telefone, CNPJ e chave Pix a cada emissão.
-   - Converte automaticamente o valor total para **texto por extenso** (ex: *R$ 1.250,50* vira *um mil, duzentos e cinquenta reais e cinquenta centavos*), item essencial em recibos jurídicos de quitação.
-   - Gera um PDF vetorial com corte milimétrico A4 limpo.
-   - Gera link direto com mensagem pronta para envio no **WhatsApp** do cliente com 1 clique.
-
----
-
 ## 🛠️ Tecnologias Utilizadas
 
 - **HTML5 Semântico:** Estrutura acessível com formulários nativos, metatags OpenGraph e validação.
@@ -59,24 +46,6 @@ Muitos projetos de portfólio limitam-se a clones de redes sociais ou listas de 
 | **Impressão Direta** | Botão de impressão com estilos CSS dedicados que ocultam menus e mostram apenas o documento. |
 | **Compartilhar no WhatsApp** | Gera mensagem estruturada com saudação, total e número da nota direto para o contato do cliente. |
 | **Responsivo para Celular** | Abas dedicadas ("Formulário" / "Ver Documento") permitindo ao autônomo fechar negócio na obra ou na rua pelo smartphone. |
-
----
-
-## 📂 Estrutura de Arquivos
-
-```
-NotaFácil/
-├── index.html          # Interface principal e folha A4
-├── css/
-│   └── style.css       # Layout split, folha A4, estilos responsivos e print
-├── js/
-│   ├── app.js          # Lógica central, eventos, estado e localStorage
-│   ├── utils.js        # Formatação BRL, número por extenso e máscaras
-│   └── pdf.js          # Geração do PDF via html2pdf/jsPDF e WhatsApp share
-├── assets/
-│   └── favicon.svg     # Ícone do projeto
-└── README.md           # Documentação completa
-```
 
 ---
 
